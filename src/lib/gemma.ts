@@ -115,9 +115,9 @@ Perform deep forensic analysis and return the JSON response.`;
       : "Severe visibility deficit: Missing root Schema.org/Product JSON-LD causes AI search engines to drop variants.",
     criticalFlaws: flaws.length ? flaws : ["Missing structured variant specifications in OpenGraph headers."],
     recommendations: [
-      "Inject standardized JSON-LD into the Shopify theme liquid header.",
-      "Add explicit GTIN-13/UPC barcodes to allow agentic price comparison.",
-      "Specify itemCondition and priceValidUntil to prevent stale cache hits.",
+      "Inject verified JSON-LD into your store template to expose full variant arrays.",
+      "If your product has an official barcode (UPC/EAN/GTIN), declare it to improve cross-catalog matching.",
+      "Ensure currency code and availability reflect real-time inventory state.",
     ],
     generatedJsonLd: {
       "@context": "https://schema.org/",
@@ -130,14 +130,14 @@ Perform deep forensic analysis and return the JSON response.`;
         "name": productData.brand,
       },
       "sku": productData.sku || "PROD-SKU",
-      ...(productData.gtin ? { "gtin13": productData.gtin } : { "gtin13": "INSERT_YOUR_UPC_OR_EAN_BARCODE" }),
+      ...(productData.gtin ? { "gtin13": productData.gtin } : {}),
       "offers": {
         "@type": "Offer",
         "url": "https://example.com/product",
         "priceCurrency": productData.currency,
         "price": productData.price,
         "itemCondition": "https://schema.org/NewCondition",
-        "availability": "https://schema.org/InStock",
+        "availability": productData.availability === "InStock" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       },
     },
   };

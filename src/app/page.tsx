@@ -347,11 +347,14 @@ export default function Home() {
                           </div>
                         </div>
                       ))}
+                      <p className="text-[10px] text-slate-400 mt-2 font-mono">
+                        *Note: Reseller prices on secondary marketplaces (Poshmark, eBay) often reflect clearance, used condition, or specific single variants.
+                      </p>
                     </div>
                   ) : (
                     <div className="py-6 px-4 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 text-center">
                       <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-80" />
-                      <h5 className="font-semibold text-xs text-white mb-1">Zero MAP Violations Detected</h5>
+                      <h5 className="font-semibold text-xs text-white mb-1">Zero Third-Party Undercuts Detected</h5>
                       <p className="text-[11px] text-slate-400 leading-relaxed max-w-xs mx-auto">
                         No rogue 3rd-party sellers are currently undercutting your official price on Google Shopping.
                       </p>
@@ -368,9 +371,14 @@ export default function Home() {
 
             {/* Apple-Grade Visual Transformation: The AI Shopping Simulation */}
             <div className="p-6 rounded-3xl bg-slate-900/60 border border-white/[0.1] backdrop-blur-xl">
-              <div className="flex items-center gap-2 mb-4 text-xs font-mono uppercase tracking-wider text-slate-400">
-                <Cpu className="w-4 h-4 text-cyan-400" />
-                <span>Simulated Agent Behavior: Before vs After Gemma Fix</span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-400">
+                  <Cpu className="w-4 h-4 text-cyan-400" />
+                  <span>Agent Behavior Simulation: Before vs After</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.05] text-slate-400 border border-white/[0.06]">
+                  Illustrative Simulation
+                </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
@@ -378,12 +386,12 @@ export default function Home() {
                 <div className="p-4 rounded-2xl bg-rose-500/[0.04] border border-rose-500/20">
                   <div className="flex items-center justify-between mb-2 pb-2 border-b border-rose-500/10 text-rose-400">
                     <span className="font-bold flex items-center gap-1.5">
-                      <span>✕</span> Without Schema Fix
+                      <span>✕</span> Without Complete Microdata
                     </span>
-                    <span className="text-[10px] bg-rose-500/10 px-2 py-0.5 rounded-full">Customer Lost</span>
+                    <span className="text-[10px] bg-rose-500/10 px-2 py-0.5 rounded-full">Simulated Risk</span>
                   </div>
                   <p className="text-slate-400 leading-relaxed font-sans text-xs">
-                    <strong className="text-slate-300 font-mono">ChatGPT Search:</strong> "Found 3 alternative sneakers. Warning: {result.product.title} has unverified barcode metadata. Recommending verified alternative."
+                    <strong className="text-slate-300 font-mono">LLM Agent Parsing:</strong> "Found multiple sneaker alternatives. Note: {result.product.title} catalog emits incomplete variant microdata; secondary sizes and current stock confidence cannot be independently validated."
                   </p>
                 </div>
 
@@ -391,12 +399,12 @@ export default function Home() {
                 <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20">
                   <div className="flex items-center justify-between mb-2 pb-2 border-b border-emerald-500/10 text-emerald-400">
                     <span className="font-bold flex items-center gap-1.5">
-                      <span>✓</span> With CatalogPulse Schema
+                      <span>✓</span> With Validated JSON-LD
                     </span>
-                    <span className="text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">1-Click Buy</span>
+                    <span className="text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">Machine-Verified</span>
                   </div>
                   <p className="text-slate-300 leading-relaxed font-sans text-xs">
-                    <strong className="text-emerald-400 font-mono">ChatGPT Search:</strong> "Recommended: {result.product.title} by {result.product.brand}. Verified in stock at {result.product.price} {result.product.currency}. [Buy Directly →]"
+                    <strong className="text-emerald-400 font-mono">LLM Agent Parsing:</strong> "Recommended: {result.product.title} by {result.product.brand}. Structured Schema.org Offer node validates in-stock status at {result.product.price} {result.product.currency}."
                   </p>
                 </div>
               </div>

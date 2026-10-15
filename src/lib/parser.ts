@@ -96,10 +96,10 @@ export function parseProductHtml(html: string, pageUrl: string): ExtractedProduc
 
   // Heuristic Diagnostics
   if (!rawJsonLd.length) {
-    detectedIssues.push("Missing root Schema.org/Product JSON-LD. AI crawlers cannot parse structured pricing.");
+    detectedIssues.push("Missing root Schema.org/Product JSON-LD. AI crawlers cannot parse structured pricing or variants reliably.");
   }
   if (!gtin) {
-    detectedIssues.push("Missing GTIN / Barcode (GTIN-13/UPC). ChatGPT & Google Shopping demote unverified items.");
+    detectedIssues.push("No GTIN/UPC barcode declared. While optional for custom items, standard retail products without GTINs face harder entity disambiguation in AI shopping indexes.");
   }
   if (!sku) {
     detectedIssues.push("No explicit SKU found in structured headers.");
