@@ -63,8 +63,8 @@ export default function Home() {
   };
 
   const sampleUrls = [
-    { label: "Shopify Store", url: "https://shop.allbirds.com/products/mens-tree-runner" },
-    { label: "D2C Apparel", url: "https://gymshark.com/products/crest-hoodie" },
+    { label: "Shopify Store", url: "https://www.allbirds.com/products/mens-tree-runners" },
+    { label: "Gymshark Activewear", url: "https://www.gymshark.com/products/gymshark-crest-hoodie-black-aw23" },
   ];
 
   return (

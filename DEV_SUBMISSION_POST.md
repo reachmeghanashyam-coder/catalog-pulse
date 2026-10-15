@@ -12,7 +12,7 @@ cover_image:
 
 ## What I Built
 
-When buyers ask **ChatGPT Search, Perplexity, or Gemini** for product recommendations (e.g., *"Best waterproof trail running shoes under $150"*), AI shopping agents crawl product pages to read machine-readable metadata.
+When buyers ask **ChatGPT Search, Perplexity, or Gemini** for product recommendations (e.g., *"Best waterproof trail running shoes under $150"*), autonomous AI shopping agents crawl product pages to read structured, machine-readable metadata.
 
 Over **74% of independent small merchants and Shopify side hustlers suffer from silent catalog dropouts**:
 1. Client-side JavaScript variant pickers hide secondary sizes/colors from AI crawlers.
@@ -31,7 +31,7 @@ Large enterprises pay thousands of dollars per month for commercial observabilit
 
 ## Demo
 
-* **Live Deployed App:** [https://catalog-pulse.vercel.app](https://catalog-pulse.vercel.app) *(Replace with your deployment URL)*
+* **Live Deployed App:** [https://catalog-pulse.vercel.app](https://catalog-pulse.vercel.app)
 * **Sample Product Audited:** Allbirds Tree Runner / Gymshark Hoodies
 
 ### Key Capabilities in Action:
@@ -46,7 +46,7 @@ Large enterprises pay thousands of dollars per month for commercial observabilit
 
 The complete source code is open-source under the MIT License on GitHub:
 
-{% github your-username/catalog-pulse %}
+{% github reachmeghanashyam-coder/catalog-pulse %}
 
 ---
 
@@ -54,7 +54,7 @@ The complete source code is open-source under the MIT License on GitHub:
 
 The project is built on modern web standards with an entirely open-source AI architecture:
 
-* **Open-Weight AI Core:** **Google Gemma 2 (`google/gemma-2-9b-it`)** running inference via Groq / Hugging Face. Gemma acts as an automated semantic auditor: it ingests raw product microdata, detects inconsistencies, and synthesizes clean JSON-LD specifications.
+* **Open-Weight AI Core:** **Google Gemma 2 (`google/gemma-2-9b-it`)** running inference via Groq. Gemma acts as an automated semantic auditor: it ingests raw product microdata, detects inconsistencies, and synthesizes clean JSON-LD specifications.
 * **Live Search Telemetry:** **SerpApi Google Shopping Engine** queries real-time merchant listings to cross-reference prices and detect pricing discrepancies.
 * **Extraction Engine:** Cheerio server-side DOM parser extracting OpenGraph, JSON-LD, and meta tags.
 * **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide Icons.
