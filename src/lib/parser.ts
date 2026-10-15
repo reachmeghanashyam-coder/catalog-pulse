@@ -99,7 +99,7 @@ export function parseProductHtml(html: string, pageUrl: string): ExtractedProduc
     detectedIssues.push("Missing root Schema.org/Product JSON-LD. AI crawlers cannot parse structured pricing or variants reliably.");
   }
   if (!gtin) {
-    detectedIssues.push("No GTIN/UPC barcode declared. While optional for custom items, standard retail products without GTINs face harder entity disambiguation in AI shopping indexes.");
+    detectedIssues.push("No GTIN/UPC barcode declared. Harder for AI agents to uniquely verify and match this item.");
   }
   if (!sku) {
     detectedIssues.push("No explicit SKU found in structured headers.");
