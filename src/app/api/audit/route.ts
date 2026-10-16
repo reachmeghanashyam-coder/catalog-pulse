@@ -138,8 +138,12 @@ export async function POST(req: NextRequest) {
     // Step 1: Parse product structure & microdata
     const parsedProduct = parseProductHtml(htmlContent, targetUrl);
 
-    // Step 2: Fetch live shopping context via SerpApi
-    const serpContext = await fetchShoppingTelemetry(parsedProduct.title);
+    // Step 2: Fetch live shopping context via SerpApi with clean brand-aware query
+    const brandPrefix = parsedProduct.brand && !parsedProduct.title.toLowerCase().includes(parsedProduct.brand.toLowerCase())
+      ? `${parsedProduct.brand} `
+      : "";
+    const cleanSearchQuery = `${brandPrefix}${parsedProduct.title}`.trim();
+    const serpContext = await fetchShoppingTelemetry(cleanSearchQuery);
 
     // Step 3: Run Google Gemma 2 open-weights audit & code generation
     const gemmaAudit = await runGemmaAudit(parsedProduct, serpContext);

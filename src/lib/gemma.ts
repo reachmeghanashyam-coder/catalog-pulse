@@ -39,37 +39,50 @@ SerpApi Google Shopping Signals: ${JSON.stringify(serpContext || {})}
 
 Perform deep forensic analysis and return the JSON response.`;
 
-  // 1. Try Groq (Ultra-fast Gemma 2 9B inference)
+  // 1. Try Groq Open-Weights Inference (Fast, production-grade)
   if (groqApiKey) {
-    try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${groqApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gemma2-9b-it",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.2,
-        }),
-      });
+    const modelsToTry = [
+      "qwen/qwen3.8-27b",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+    ];
 
-      if (res.ok) {
-        const data = await res.json();
-        const content = data.choices[0]?.message?.content;
-        return JSON.parse(content);
+    for (const modelId of modelsToTry) {
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: modelId,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.2,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const content = data.choices[0]?.message?.content;
+          if (content) {
+            const parsed = JSON.parse(content);
+            if (parsed.score && parsed.generatedJsonLd) {
+              return parsed;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Groq ${modelId} inference error:`, e);
       }
-    } catch (e) {
-      console.error("Groq Gemma 2 inference error:", e);
     }
   }
 
-  // 2. Try Hugging Face Inference API for Google Gemma 2
+  // 2. Try Hugging Face Inference API for Google Gemma 2 / open weights
   if (hfApiKey) {
     try {
       const res = await fetch(
@@ -90,7 +103,7 @@ Perform deep forensic analysis and return the JSON response.`;
       if (res.ok) {
         const data = await res.json();
         const raw = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        const jsonMatch = raw?.match(/\{[\s\S]*\}/);
         if (jsonMatch) return JSON.parse(jsonMatch[0]);
       }
     } catch (e) {
@@ -98,7 +111,7 @@ Perform deep forensic analysis and return the JSON response.`;
     }
   }
 
-  // 3. Robust Deterministic Fallback if no keys provided yet
+  // 3. Robust Grounded Fallback if model API unavailable
   const flaws = [...productData.detectedIssues];
   let calculatedScore = 85;
   if (!productData.microdataPresent) calculatedScore -= 35;
@@ -111,8 +124,8 @@ Perform deep forensic analysis and return the JSON response.`;
     score: Math.max(calculatedScore, 20),
     grade,
     summary: productData.microdataPresent 
-      ? "Product contains basic metadata, but missing standardized GTIN identifiers prevents reliable agentic checkout."
-      : "Severe visibility deficit: Missing root Schema.org/Product JSON-LD causes AI search engines to drop variants.",
+      ? `Product ${productData.title} by ${productData.brand} exposes basic metadata, but missing standardized GTIN identifiers limits cross-catalog verification for AI shopping agents.`
+      : `Critical visibility deficit: Missing root Schema.org/Product JSON-LD causes AI agents to drop secondary sizes and variant pricing.`,
     criticalFlaws: flaws.length ? flaws : ["Missing structured variant specifications in OpenGraph headers."],
     recommendations: [
       "Inject verified JSON-LD into your store template to expose full variant arrays.",
@@ -133,7 +146,7 @@ Perform deep forensic analysis and return the JSON response.`;
       ...(productData.gtin ? { "gtin13": productData.gtin } : {}),
       "offers": {
         "@type": "Offer",
-        "url": "https://example.com/product",
+        "url": productData.url || "https://yourstore.com/products/item",
         "priceCurrency": productData.currency,
         "price": productData.price,
         "itemCondition": "https://schema.org/NewCondition",

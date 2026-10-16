@@ -16,7 +16,7 @@ When buyers ask **ChatGPT Search, Perplexity, or Gemini** for product recommenda
 
 Over **74% of independent small merchants and Shopify side hustlers suffer from silent catalog dropouts**:
 1. Client-side JavaScript variant pickers hide secondary sizes/colors from AI crawlers.
-2. Missing **GTIN barcodes** cause AI search engines to flag products as unverified or out-of-stock.
+2. Missing **GTIN barcodes** prevent AI agents from reliably cross-verifying product authenticity against merchant registries.
 3. Malformed Schema.org `Product` and `Offer` nodes make direct agentic purchasing impossible.
 
 Large enterprises pay thousands of dollars per month for commercial observability platforms. **Small merchants and indie side hustlers cannot afford this.**

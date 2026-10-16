@@ -13,6 +13,7 @@ export interface ExtractedProductData {
   rawJsonLd: any[];
   microdataPresent: boolean;
   detectedIssues: string[];
+  url?: string;
 }
 
 export function parseProductHtml(html: string, pageUrl: string): ExtractedProductData {
@@ -118,5 +119,6 @@ export function parseProductHtml(html: string, pageUrl: string): ExtractedProduc
     rawJsonLd,
     microdataPresent: rawJsonLd.length > 0,
     detectedIssues,
+    url: pageUrl,
   };
 }
