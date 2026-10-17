@@ -14,6 +14,8 @@ However, over **74% of independent e-commerce stores and small merchants suffer 
 2. Missing **GTIN/barcode identifiers** cause AI search engines to demote or flag products as "unverified".
 3. Malformed or missing Schema.org `Product` and `Offer` nodes make direct 1-click agentic purchases impossible.
 
+*(Note: Based on an exploratory sample audit of independent Shopify & WooCommerce product pages, where client-side JavaScript variant pickers omitted secondary SKUs and GTINs from static server-rendered HTML).*
+
 Large enterprises pay thousands of dollars for enterprise SEO/observability tools. **Small merchants and indie side hustlers cannot afford this.**
 
 ---
@@ -24,7 +26,7 @@ Large enterprises pay thousands of dollars for enterprise SEO/observability tool
 1. Takes any product URL (Shopify, WooCommerce, custom D2C).
 2. Extracts live DOM metadata and existing Schema microdata.
 3. Queries **SerpApi Google Shopping** to cross-reference market pricing and detect competitor displacement.
-4. Uses **Google Gemma 2 (open-weights)** to run a deep forensic audit, score the product's AI Agent Discoverability (0–100), and generate a 100% compliant, copy-pasteable **Schema.org Product JSON-LD** snippet.
+4. Uses **Google Gemma 2 (open-weights)** to run a deep forensic audit, score the product's AI Agent Discoverability (0–100), and generate a standards-compliant, copy-pasteable **Schema.org Product JSON-LD** snippet.
 
 ---
 
