@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
                 <meta property="og:title" content="Men's Tree Runner - Allbirds">
                 <meta property="og:site_name" content="Allbirds">
                 <meta property="og:description" content="Our classic everyday sneaker made with breathable eucalyptus tree fiber. Lightweight, cool, and comfortable.">
-                <meta property="og:image" content="https://cdn.allbirds.com/image/upload/tree-runners.jpg">
+                <meta property="og:image" content="https://www.allbirds.com/cdn/shop/files/TR3MJBW080_SHOE_LEFT_GLOBAL_MENS_TREE_RUNNER_JET_BLACK_WHITE.png?v=1751165486&width=300">
                 <script type="application/ld+json">
                   {
                     "@context": "https://schema.org/",
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
                 <meta property="og:title" content="Crest Hoodie - Gymshark">
                 <meta property="og:site_name" content="Gymshark">
                 <meta property="og:description" content="Slim fit training hoodie with soft brushed fleece interior and kangaroo pocket.">
-                <meta property="og:image" content="https://cdn.gymshark.com/crest-hoodie.jpg">
+                <meta property="og:image" content="https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTVAS8F5reh2nCVjvrRu0Th0UTlQXqpfqFY2z05cNtFpQlfVGdr7qR_H4CJDY21ED4bsZXtW6s">
                 <script type="application/ld+json">
                   {
                     "@context": "https://schema.org/",
