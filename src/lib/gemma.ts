@@ -47,7 +47,11 @@ Perform deep forensic analysis and return the JSON response.`;
     const gemmaModels = ["gemma-4-31b-it", "gemma-4-26b-a4b-it"];
     for (const gemmaModel of gemmaModels) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
         const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+          signal: controller.signal,
           method: "POST",
           headers: {
             "Authorization": `Bearer ${geminiApiKey}`,
@@ -62,6 +66,7 @@ Perform deep forensic analysis and return the JSON response.`;
             temperature: 0.2,
           }),
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
