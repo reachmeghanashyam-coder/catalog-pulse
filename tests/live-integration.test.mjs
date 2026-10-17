@@ -25,6 +25,8 @@ test("Live Production Audit: Allbirds Tree Runner test against live Vercel deplo
   const data = await res.json();
 
   assert.equal(data.success, true);
+  assert.ok(data.auditedAt, "Audit timestamp must be returned");
+  assert.ok(data.extractionMode, "Extraction provenance mode must be returned");
   assert.ok(data.product, "Product extraction must be present");
   assert.equal(data.product.brand, "Allbirds");
   assert.ok(data.product.price, "Price must be extracted");
@@ -37,6 +39,8 @@ test("Live Production Audit: Allbirds Tree Runner test against live Vercel deplo
   assert.ok(data.serpContext.marketItems[0].title, "Market item must contain product title");
   assert.ok(data.serpContext.marketItems[0].price, "Market item must contain price");
   assert.ok(data.serpContext.marketItems[0].source, "Market item must identify merchant/source");
+  assert.ok(data.priceIntegrity, "Deterministic priceIntegrity calculation must be returned");
+  assert.equal(typeof data.priceIntegrity.undercutDetected, "boolean");
 
   // --- Provider 2: Google Gemma Independent Verification ---
   assert.ok(data.audit, "Gemma audit result must be present");
@@ -54,7 +58,9 @@ test("Live Production Audit: Allbirds Tree Runner test against live Vercel deplo
 
   console.log(`\n=======================================================`);
   console.log(`>>> INDEPENDENT PROVIDER VERIFICATION: PASS <<<`);
+  console.log(`0. Provenance: ${data.extractionMode} @ ${data.auditedAt}`);
   console.log(`1. SerpApi: ${data.serpContext.totalResultsFound} Google Shopping results via ${data.serpContext.source}`);
+  console.log(`   Price Integrity: ${data.priceIntegrity.statusLabel} (Floor: $${data.priceIntegrity.minMarketPrice}, Median: $${data.priceIntegrity.medianMarketPrice}, Ceiling: $${data.priceIntegrity.maxMarketPrice})`);
   console.log(`   Sample Market Item: "${data.serpContext.marketItems[0].title}" - ${data.serpContext.marketItems[0].price} (${data.serpContext.marketItems[0].source})`);
   console.log(`2. Google Gemma: Verified active model -> ${data.audit.modelUsed}`);
   console.log(`   Audit Score: ${data.audit.score} (Grade ${data.audit.grade})`);

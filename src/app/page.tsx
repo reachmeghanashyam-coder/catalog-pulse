@@ -64,16 +64,25 @@ export default function Home() {
 
   const downloadClientReport = () => {
     if (!result) return;
-    const { product, serpContext, audit } = result;
+    const { product, serpContext, priceIntegrity, audit, extractionMode, auditedAt } = result;
     const marketRows = (serpContext?.marketItems || [])
-      .map((item: any) => `| ${item.title} | ${item.price} | ${item.source} |`)
+      .map((item: any) => {
+        const merchantCell = item.link ? `[${item.source}](${item.link})` : item.source;
+        return `| ${item.title} | ${item.price} | ${merchantCell} |`;
+      })
       .join("\n");
+
+    const spreadSummary = priceIntegrity?.minMarketPrice
+      ? `$${priceIntegrity.minMarketPrice} – $${priceIntegrity.maxMarketPrice} (Median: $${priceIntegrity.medianMarketPrice}) — ${priceIntegrity.statusLabel}`
+      : "No external market listings compared";
 
     const reportMd = `# CatalogPulse — AI Search & Agentic Commerce Audit Report
 
 **Product:** ${product.title}  
 **Brand:** ${product.brand}  
 **Inspected URL:** ${product.url || url}  
+**Audited Timestamp (UTC):** ${auditedAt || serpContext?.fetchedAt || new Date().toISOString()}  
+**Extraction Provenance:** ${extractionMode || "Live Storefront HTML"}  
 **Official Price:** ${product.price} ${product.currency}  
 **GTIN / Barcode:** ${product.gtin || "MISSING (Critical Warning)"}  
 **AI Discoverability Score:** **${audit.score} / 100 (Grade ${audit.grade})**  
@@ -91,7 +100,9 @@ ${(audit.criticalFlaws || []).map((f: string) => `- ❌ ${f}`).join("\n")}
 ${(audit.recommendations || []).map((r: string) => `- ✅ ${r}`).join("\n")}
 
 ## 4. Live Google Shopping Market Telemetry (via SerpApi)
+- **Telemetry Source:** ${serpContext?.source || "SerpApi Google Shopping Engine"}
 - **Total Listings Indexed:** ${serpContext?.totalResultsFound || 0}
+- **Deterministic Price Spread:** ${spreadSummary}
 
 | Listing Title | Price | Merchant / Source |
 | :--- | :--- | :--- |
@@ -323,13 +334,21 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
                   <span className="text-[10px] uppercase font-mono mt-0.5">Grade {result.audit.grade}</span>
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-1.5 text-[11px] font-mono text-cyan-400 mb-1">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-cyan-400 mb-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Catalog Audit Complete</span>
                     {result.audit.modelUsed && (
                       <>
                         <span className="text-slate-600">•</span>
                         <span className="text-emerald-400 font-mono">{result.audit.modelUsed}</span>
+                      </>
+                    )}
+                    {result.extractionMode && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 text-[10px]">
+                          {result.extractionMode}
+                        </span>
                       </>
                     )}
                   </div>
@@ -388,30 +407,66 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
               {/* SerpApi Market Intelligence & Shield */}
               <div className="p-6 rounded-3xl bg-slate-900/50 border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between gap-2 mb-4">
                     <div className="flex items-center gap-2 text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
                       <TrendingUp className="w-4 h-4" />
                       <span>SerpApi Market Telemetry</span>
                     </div>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono border border-emerald-500/20">
-                      <ShieldCheck className="w-3 h-3" />
-                      100% Price Integrity
-                    </span>
+                    {result.priceIntegrity?.undercutDetected ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-mono border border-amber-500/25">
+                        <AlertTriangle className="w-3 h-3" />
+                        {result.priceIntegrity.statusLabel}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono border border-emerald-500/20">
+                        <ShieldCheck className="w-3 h-3" />
+                        {result.priceIntegrity?.statusLabel || "Price Parity Verified"}
+                      </span>
+                    )}
                   </div>
+
+                  {result.priceIntegrity?.minMarketPrice && (
+                    <div className="grid grid-cols-3 gap-2 mb-3 p-2.5 rounded-xl bg-black/40 border border-white/[0.05] font-mono text-[11px]">
+                      <div>
+                        <span className="text-slate-500 text-[9px] uppercase block">Market Floor</span>
+                        <span className="text-cyan-400 font-semibold">${result.priceIntegrity.minMarketPrice}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 text-[9px] uppercase block">Market Median</span>
+                        <span className="text-white font-semibold">${result.priceIntegrity.medianMarketPrice}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 text-[9px] uppercase block">Market Ceiling</span>
+                        <span className="text-slate-300 font-semibold">${result.priceIntegrity.maxMarketPrice}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {result.serpContext.marketItems?.length > 0 ? (
                     <div className="space-y-2.5">
                       {result.serpContext.marketItems.map((item: any, idx: number) => (
                         <div key={idx} className="flex items-center justify-between text-xs p-3 rounded-xl bg-slate-950/40 border border-white/[0.04]">
-                          <span className="truncate max-w-[200px] text-slate-300">{item.title}</span>
-                          <div className="flex items-center gap-2 font-mono">
+                          <span className="truncate max-w-[190px] text-slate-300" title={item.title}>{item.title}</span>
+                          <div className="flex items-center gap-2 font-mono shrink-0">
                             <span className="text-cyan-400 font-semibold">{item.price}</span>
-                            <span className="text-[10px] text-slate-500">{item.source}</span>
+                            {item.link ? (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-cyan-300 underline decoration-white/20"
+                              >
+                                <span>{item.source}</span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            ) : (
+                              <span className="text-[10px] text-slate-500">{item.source}</span>
+                            )}
                           </div>
                         </div>
                       ))}
                       <p className="text-[10px] text-slate-400 mt-2 font-mono">
-                        *Note: Reseller prices on secondary marketplaces (Poshmark, eBay) often reflect clearance, used condition, or specific single variants.
+                        *Note: Secondary marketplace listings (Poshmark, eBay, Mercari) may reflect clearance, pre-owned condition, or single-size variants.
                       </p>
                     </div>
                   ) : (
@@ -425,9 +480,13 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
                   )}
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-slate-500">
-                  <span>Surface: Google Shopping</span>
-                  <span className="text-emerald-400">Live Cross-Reference Active</span>
+                <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-500">
+                  <span>{result.serpContext.source || "SerpApi Google Shopping"}</span>
+                  <span className="text-emerald-400">
+                    {result.serpContext.fetchedAt
+                      ? `Verified ${new Date(result.serpContext.fetchedAt).toISOString().slice(11, 19)} UTC`
+                      : "Live Cross-Reference Active"}
+                  </span>
                 </div>
               </div>
             </div>

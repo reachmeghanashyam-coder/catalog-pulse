@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { fetchShoppingTelemetry } from "../src/lib/serpapi.ts";
+import { fetchShoppingTelemetry, computePriceIntegrity } from "../src/lib/serpapi.ts";
 
 test("SerpApi: handles missing API key or product title safely without crashing", async () => {
   const origKey = process.env.SERPAPI_API_KEY;
@@ -10,6 +10,7 @@ test("SerpApi: handles missing API key or product title safely without crashing"
     const resultNoKey = await fetchShoppingTelemetry("Allbirds Tree Runner");
     assert.equal(resultNoKey.source, "SerpApi Google Shopping (Simulated / Key Missing)");
     assert.equal(resultNoKey.totalResultsFound, 0);
+    assert.ok(resultNoKey.fetchedAt, "Must include ISO fetchedAt timestamp");
     assert.deepEqual(resultNoKey.marketItems, []);
 
     const resultNoTitle = await fetchShoppingTelemetry("");
@@ -46,7 +47,7 @@ test("SerpApi: handles upstream API failure gracefully", async () => {
   }
 });
 
-test("SerpApi: parses valid shopping results accurately", async () => {
+test("SerpApi: parses valid shopping results and calculates deterministic priceSpread accurately", async () => {
   const origKey = process.env.SERPAPI_API_KEY;
   const origFetch = globalThis.fetch;
 
@@ -64,12 +65,14 @@ test("SerpApi: parses valid shopping results accurately", async () => {
           {
             title: "Allbirds Men's Wool Runner Sneaker",
             price: "$110.00",
+            extracted_price: 110,
             source: "Nordstrom",
             link: "https://nordstrom.com/product/1",
           },
           {
             title: "Allbirds Wool Runners - Natural White",
             price: "$98.00",
+            extracted_price: 98,
             source: "REI",
             link: "https://rei.com/product/2",
           },
@@ -87,9 +90,49 @@ test("SerpApi: parses valid shopping results accurately", async () => {
     assert.equal(result.marketItems[0].price, "$110.00");
     assert.equal(result.marketItems[0].source, "Nordstrom");
     assert.equal(result.marketItems[0].link, "https://nordstrom.com/product/1");
+    assert.deepEqual(result.priceSpread, { min: 98, max: 110, median: 104 });
   } finally {
     globalThis.fetch = origFetch;
     if (origKey) process.env.SERPAPI_API_KEY = origKey;
     else delete process.env.SERPAPI_API_KEY;
   }
 });
+
+test("Price Integrity Engine: detects secondary marketplace reseller undercuts deterministically", () => {
+  const analysis = computePriceIntegrity("45.00", [
+    { price: "$25.00", source: "Poshmark" },
+    { price: "$45.00", source: "Gymshark" },
+    { price: "$50.00", source: "eBay" },
+  ]);
+
+  assert.equal(analysis.officialPrice, 45);
+  assert.equal(analysis.minMarketPrice, 25);
+  assert.equal(analysis.medianMarketPrice, 45);
+  assert.equal(analysis.maxMarketPrice, 50);
+  assert.equal(analysis.undercutDetected, true);
+  assert.equal(analysis.undercutPercent, 44);
+  assert.equal(analysis.lowestSeller, "Poshmark");
+  assert.ok(analysis.statusLabel.includes("Reseller Undercut (-44% on Poshmark)"));
+});
+
+test("Price Integrity Engine: verifies price parity when all market comps >= official price", () => {
+  const analysis = computePriceIntegrity("98.00", [
+    { price: "$98.00", source: "Allbirds" },
+    { price: "$110.00", source: "Nordstrom" },
+  ]);
+
+  assert.equal(analysis.undercutDetected, false);
+  assert.equal(analysis.undercutPercent, 0);
+  assert.equal(analysis.minMarketPrice, 98);
+  assert.equal(analysis.maxMarketPrice, 110);
+  assert.equal(analysis.medianMarketPrice, 104);
+  assert.equal(analysis.statusLabel, "Price Parity Verified");
+});
+
+test("Price Integrity Engine: handles empty market items safely", () => {
+  const analysis = computePriceIntegrity("98.00", []);
+  assert.equal(analysis.minMarketPrice, null);
+  assert.equal(analysis.undercutDetected, false);
+  assert.equal(analysis.statusLabel, "No External Comps Found");
+});
+

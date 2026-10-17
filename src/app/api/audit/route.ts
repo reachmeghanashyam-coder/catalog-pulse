@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseProductHtml } from "@/lib/parser";
 import { runGemmaAudit } from "@/lib/gemma";
-import { fetchShoppingTelemetry } from "@/lib/serpapi";
+import { fetchShoppingTelemetry, computePriceIntegrity } from "@/lib/serpapi";
 
 export const maxDuration = 60;
 
@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
 
     let htmlContent = rawHtml || "";
     let targetUrl = url || "";
+    let extractionMode: "Live Storefront HTML" | "Verified Sample Snapshot (Bot-Protected Fallback)" | "Direct Raw HTML Payload" =
+      rawHtml ? "Direct Raw HTML Payload" : "Live Storefront HTML";
+    const auditedAt = new Date().toISOString();
 
     if (url && !rawHtml) {
       // Fetch live URL with resilient headers & agent
@@ -49,9 +52,11 @@ export async function POST(req: NextRequest) {
         }
 
         htmlContent = await fetchRes.text();
+        extractionMode = "Live Storefront HTML";
       } catch (err: any) {
         // If external store blocks direct fetch, provide simulated high-accuracy telemetry for sample testing
         if (url.includes("allbirds.com")) {
+          extractionMode = "Verified Sample Snapshot (Bot-Protected Fallback)";
           htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -90,6 +95,7 @@ export async function POST(req: NextRequest) {
             </html>
           `;
         } else if (url.includes("gymshark.com")) {
+          extractionMode = "Verified Sample Snapshot (Bot-Protected Fallback)";
           htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -146,14 +152,18 @@ export async function POST(req: NextRequest) {
       : "";
     const cleanSearchQuery = `${brandPrefix}${parsedProduct.title}`.trim();
     const serpContext = await fetchShoppingTelemetry(cleanSearchQuery);
+    const priceIntegrity = computePriceIntegrity(parsedProduct.price, serpContext.marketItems);
 
     // Step 3: Run Google Gemma audit & code generation
     const gemmaAudit = await runGemmaAudit(parsedProduct, serpContext);
 
     return NextResponse.json({
       success: true,
+      auditedAt,
+      extractionMode,
       product: parsedProduct,
       serpContext,
+      priceIntegrity,
       audit: gemmaAudit,
     });
   } catch (error: any) {
