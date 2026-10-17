@@ -62,6 +62,61 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadClientReport = () => {
+    if (!result) return;
+    const { product, serpContext, audit } = result;
+    const marketRows = (serpContext?.marketItems || [])
+      .map((item: any) => `| ${item.title} | ${item.price} | ${item.source} |`)
+      .join("\n");
+
+    const reportMd = `# CatalogPulse — AI Search & Agentic Commerce Audit Report
+
+**Product:** ${product.title}  
+**Brand:** ${product.brand}  
+**Inspected URL:** ${product.url || url}  
+**Official Price:** ${product.price} ${product.currency}  
+**GTIN / Barcode:** ${product.gtin || "MISSING (Critical Warning)"}  
+**AI Discoverability Score:** **${audit.score} / 100 (Grade ${audit.grade})**  
+**Inference Engine:** ${audit.modelUsed || "Google Gemma 4"}
+
+---
+
+## 1. Executive Summary
+${audit.summary}
+
+## 2. Critical Discoverability Flaws
+${(audit.criticalFlaws || []).map((f: string) => `- ❌ ${f}`).join("\n")}
+
+## 3. Recommended Remediation Strategy
+${(audit.recommendations || []).map((r: string) => `- ✅ ${r}`).join("\n")}
+
+## 4. Live Google Shopping Market Telemetry (via SerpApi)
+- **Total Listings Indexed:** ${serpContext?.totalResultsFound || 0}
+
+| Listing Title | Price | Merchant / Source |
+| :--- | :--- | :--- |
+${marketRows || "| No external listings found | - | - |"}
+
+## 5. Ready-to-Paste Shopify \`theme.liquid\` Schema.org Fix
+Paste this snippet inside your \`<head>\` or product template:
+
+\`\`\`html
+<script type="application/ld+json">
+${JSON.stringify(audit.generatedJsonLd, null, 2)}
+</script>
+\`\`\`
+`;
+
+    const blob = new Blob([reportMd], { type: "text/markdown;charset=utf-8" });
+    const dlUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const slug = (product.title || "product").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    a.href = dlUrl;
+    a.download = `catalogpulse-audit-${slug}.md`;
+    a.click();
+    URL.revokeObjectURL(dlUrl);
+  };
+
   const sampleUrls = [
     { label: "Shopify Store", url: "https://www.allbirds.com/products/mens-tree-runners" },
     { label: "Gymshark Activewear", url: "https://www.gymshark.com/products/gymshark-crest-hoodie-black-aw23" },
@@ -420,18 +475,27 @@ export default function Home() {
 
             {/* Generated Code Section */}
             <div className="p-6 sm:p-7 rounded-3xl bg-[#080b12] border border-white/[0.1] shadow-2xl">
-              <div className="flex items-center justify-between mb-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5">
                 <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs">
                   <Code2 className="w-4 h-4" />
                   <span>Schema.org/Product JSON-LD ({result.audit.modelUsed || "Google Gemma Generated"})</span>
                 </div>
-                <button
-                  onClick={() => copyToClipboard(JSON.stringify(result.audit.generatedJsonLd, null, 2))}
-                  className="px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-xs font-mono text-white flex items-center gap-1.5 transition cursor-pointer active:scale-95"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copied ? "Copied!" : "Copy Code"}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={downloadClientReport}
+                    className="px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-mono text-cyan-300 flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                  >
+                    <Terminal className="w-3.5 h-3.5" />
+                    <span>Export Client Report (.md)</span>
+                  </button>
+                  <button
+                    onClick={() => copyToClipboard(JSON.stringify(result.audit.generatedJsonLd, null, 2))}
+                    className="px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-xs font-mono text-white flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{copied ? "Copied!" : "Copy Code"}</span>
+                  </button>
+                </div>
               </div>
 
               <pre className="p-4 rounded-2xl bg-black/60 border border-white/[0.05] overflow-x-auto text-[11px] font-mono text-slate-300 leading-relaxed max-h-72">

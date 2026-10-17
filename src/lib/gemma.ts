@@ -70,17 +70,52 @@ Perform deep forensic analysis and return the JSON response.`;
     };
   };
 
+  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
+  const ollamaModel = process.env.OLLAMA_MODEL || "gemma4:e4b";
+
+  const marketSummary = serpContext?.marketItems?.length
+    ? serpContext.marketItems
+        .slice(0, 4)
+        .map((i: any) => `${String(i.price || "").replace(/\$/g, "")} USD (${i.source})`)
+        .join(", ")
+    : "No external listings";
+
+  const gemmaPrompt = `You are CatalogPulse, an expert AI-Commerce & Agentic Shopping Linter. Audit this product and return ONLY a JSON object with keys: score (0-100), grade (A-F), summary (1 sentence), criticalFlaws (array of 2-3 strings), recommendations (array of 2-3 strings). Product: ${productData.title} by ${productData.brand}, Price: ${productData.price} ${productData.currency}, SKU: ${productData.sku}, GTIN: ${productData.gtin || "MISSING"}, Microdata: ${productData.microdataPresent}, Issues: ${(productData.detectedIssues || []).join(" ") || "None"}. SerpApi Market: ${serpContext?.totalResultsFound || 0} listings found (${marketSummary}).`;
+
+  // 0. Optional Local Self-Hosted Gemma via Ollama (for offline/agency data sovereignty)
+  if (ollamaBaseUrl) {
+    try {
+      const res = await fetch(`${ollamaBaseUrl.replace(/\/$/, "")}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: ollamaModel,
+          prompt: gemmaPrompt,
+          format: "json",
+          stream: false,
+          options: { temperature: 0.1 },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = data.response || "";
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (typeof parsed.score === "number") {
+            parsed.generatedJsonLd = groundJsonLd(parsed.generatedJsonLd);
+            parsed.modelUsed = `Local Ollama Gemma (${ollamaModel})`;
+            return parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(`Local Ollama (${ollamaModel}) inference error:`, e);
+    }
+  }
+
   // 1. Primary: Google Official Hosted Gemma (gemma-4-26b-a4b-it / gemma-4-31b-it) via Native REST API
   if (geminiApiKey) {
-    const marketSummary = serpContext?.marketItems?.length
-      ? serpContext.marketItems
-          .slice(0, 4)
-          .map((i: any) => `${String(i.price || "").replace(/\$/g, "")} USD (${i.source})`)
-          .join(", ")
-      : "No external listings";
-
-    const gemmaPrompt = `You are CatalogPulse, an expert AI-Commerce & Agentic Shopping Linter. Audit this product and return ONLY a JSON object with keys: score (0-100), grade (A-F), summary (1 sentence), criticalFlaws (array of 2-3 strings), recommendations (array of 2-3 strings). Product: ${productData.title} by ${productData.brand}, Price: ${productData.price} ${productData.currency}, SKU: ${productData.sku}, GTIN: ${productData.gtin || "MISSING"}, Microdata: ${productData.microdataPresent}, Issues: ${(productData.detectedIssues || []).join(" ") || "None"}. SerpApi Market: ${serpContext?.totalResultsFound || 0} listings found (${marketSummary}).`;
-
     const gemmaModels = ["gemma-4-26b-a4b-it", "gemma-4-31b-it"];
     for (const gemmaModel of gemmaModels) {
       try {

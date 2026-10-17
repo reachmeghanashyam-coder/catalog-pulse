@@ -154,3 +154,61 @@ test("Gemma Inference: Transparently falls back to Groq when Google Gemma endpoi
     else delete process.env.GROQ_API_KEY;
   }
 });
+
+test("Gemma Inference: Supports Local Ollama Gemma (gemma4:e4b) for zero-cost offline execution", async () => {
+  const origOllamaUrl = process.env.OLLAMA_BASE_URL;
+  const origFetch = globalThis.fetch;
+
+  process.env.OLLAMA_BASE_URL = "http://localhost:11434";
+
+  let ollamaHit = false;
+  globalThis.fetch = async (url, options) => {
+    const urlStr = url.toString();
+    if (urlStr.includes("localhost:11434/api/generate")) {
+      ollamaHit = true;
+      const body = JSON.parse(options.body);
+      assert.equal(body.model, "gemma4:e4b");
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          response: JSON.stringify({
+            score: 88,
+            grade: "B",
+            summary: "Local Gemma 4 verified product microdata offline.",
+            criticalFlaws: ["No GTIN barcode."],
+            recommendations: ["Add GTIN13."],
+          }),
+        }),
+      };
+    }
+    throw new Error(`Unexpected endpoint: ${urlStr}`);
+  };
+
+  try {
+    const productData = {
+      title: "Local Artisan Mug",
+      brand: "ClayWorks",
+      price: "32.00",
+      currency: "USD",
+      availability: "InStock",
+      sku: "MUG-01",
+      gtin: "",
+      microdataPresent: true,
+      images: ["https://clayworks.com/mug.jpg"],
+      url: "https://clayworks.com/products/mug",
+      detectedIssues: [],
+    };
+
+    const audit = await runGemmaAudit(productData);
+    assert.ok(ollamaHit, "Local Ollama endpoint should be invoked when OLLAMA_BASE_URL is configured");
+    assert.equal(audit.modelUsed, "Local Ollama Gemma (gemma4:e4b)");
+    assert.equal(audit.score, 88);
+    assert.equal(audit.generatedJsonLd.name, "Local Artisan Mug");
+  } finally {
+    globalThis.fetch = origFetch;
+    if (origOllamaUrl) process.env.OLLAMA_BASE_URL = origOllamaUrl;
+    else delete process.env.OLLAMA_BASE_URL;
+  }
+});
+
