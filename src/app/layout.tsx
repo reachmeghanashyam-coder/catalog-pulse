@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CatalogPulse — Open-Source AI Commerce & Schema Linter",
   description:
-    "Audit e-commerce product catalogs for AI-agent discoverability (ChatGPT Search, Perplexity, Gemini) powered by Google Gemma 2 & SerpApi.",
+    "Audit e-commerce product catalogs for AI-agent discoverability (ChatGPT Search, Perplexity, Gemini) powered by Google Gemma & SerpApi.",
 };
 
 export default function RootLayout({

@@ -181,7 +181,7 @@ Perform deep forensic analysis and return the JSON response.`;
     }
   }
 
-  // 2. Try Hugging Face Inference API for Google Gemma 2 / open weights
+  // 3. Try Hugging Face Inference API for Google Gemma / open weights
   if (hfApiKey) {
     try {
       const res = await fetch(
@@ -206,7 +206,7 @@ Perform deep forensic analysis and return the JSON response.`;
         if (jsonMatch) return JSON.parse(jsonMatch[0]);
       }
     } catch (e) {
-      console.error("Hugging Face Gemma 2 error:", e);
+      console.error("Hugging Face Gemma inference error:", e);
     }
   }
 

@@ -29,21 +29,35 @@ test("Live Production Audit: Allbirds Tree Runner test against live Vercel deplo
   assert.equal(data.product.brand, "Allbirds");
   assert.ok(data.product.price, "Price must be extracted");
 
-  assert.ok(data.serpContext, "SerpApi telemetry must be present");
-  assert.ok(typeof data.serpContext.totalResultsFound === "number");
+  // --- Provider 1: SerpApi Independent Verification ---
+  assert.ok(data.serpContext, "SerpApi context must be returned");
+  assert.equal(data.serpContext.source, "SerpApi Google Shopping Engine", "Must reach SerpApi Google Shopping Engine");
+  assert.ok(data.serpContext.totalResultsFound > 0, "Must return real Google Shopping results count");
+  assert.ok(Array.isArray(data.serpContext.marketItems) && data.serpContext.marketItems.length > 0, "Must extract parsed market items");
+  assert.ok(data.serpContext.marketItems[0].title, "Market item must contain product title");
+  assert.ok(data.serpContext.marketItems[0].price, "Market item must contain price");
+  assert.ok(data.serpContext.marketItems[0].source, "Market item must identify merchant/source");
 
+  // --- Provider 2: Google Gemma Independent Verification ---
   assert.ok(data.audit, "Gemma audit result must be present");
-  assert.ok(typeof data.audit.score === "number");
-  assert.ok(["A", "B", "C", "D", "F"].includes(data.audit.grade));
-  assert.ok(data.audit.modelUsed, "Audit must provide modelUsed telemetry");
-  console.log(`\n>>> LIVE PRODUCTION VERIFICATION SUCCESS <<<`);
-  console.log(`Product: ${data.product.title} (${data.product.brand})`);
-  console.log(`Live Model Identified: ${data.audit.modelUsed}`);
-  console.log(`Score: ${data.audit.score} / Grade: ${data.audit.grade}`);
-  console.log(`SerpApi Results Found: ${data.serpContext?.totalResultsFound}`);
-  console.log(`Generated JSON-LD Context: ${data.audit.generatedJsonLd["@context"]}, Type: ${data.audit.generatedJsonLd["@type"]}\n`);
+  assert.ok(typeof data.audit.score === "number", "Audit score must be numeric");
+  assert.ok(["A", "B", "C", "D", "F"].includes(data.audit.grade), "Audit grade must be A/B/C/D/F");
+  assert.equal(data.audit.modelUsed, "Google Gemma 4 (gemma-4-26b-a4b-it)", "Must verify Google Gemma 4 was the active engine");
+  assert.ok(Array.isArray(data.audit.criticalFlaws), "Critical flaws must be an array");
+  assert.ok(Array.isArray(data.audit.recommendations), "Recommendations must be an array");
 
-  // Verify Schema.org grounding
+  // --- Schema.org JSON-LD Fact Grounding Verification ---
+  assert.equal(data.audit.generatedJsonLd["@context"], "https://schema.org");
   assert.equal(data.audit.generatedJsonLd["@type"], "Product");
+  assert.equal(data.audit.generatedJsonLd.name, "Men's Tree Runner");
   assert.equal(data.audit.generatedJsonLd.brand?.name || data.audit.generatedJsonLd.brand, "Allbirds");
+
+  console.log(`\n=======================================================`);
+  console.log(`>>> INDEPENDENT PROVIDER VERIFICATION: PASS <<<`);
+  console.log(`1. SerpApi: ${data.serpContext.totalResultsFound} Google Shopping results via ${data.serpContext.source}`);
+  console.log(`   Sample Market Item: "${data.serpContext.marketItems[0].title}" - ${data.serpContext.marketItems[0].price} (${data.serpContext.marketItems[0].source})`);
+  console.log(`2. Google Gemma: Verified active model -> ${data.audit.modelUsed}`);
+  console.log(`   Audit Score: ${data.audit.score} (Grade ${data.audit.grade})`);
+  console.log(`   Schema Grounding: ${data.audit.generatedJsonLd["@context"]} -> ${data.audit.generatedJsonLd["@type"]}`);
+  console.log(`=======================================================\n`);
 });

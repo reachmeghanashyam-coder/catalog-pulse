@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     const cleanSearchQuery = `${brandPrefix}${parsedProduct.title}`.trim();
     const serpContext = await fetchShoppingTelemetry(cleanSearchQuery);
 
-    // Step 3: Run Google Gemma 2 open-weights audit & code generation
+    // Step 3: Run Google Gemma audit & code generation
     const gemmaAudit = await runGemmaAudit(parsedProduct, serpContext);
 
     return NextResponse.json({

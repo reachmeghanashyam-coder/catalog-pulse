@@ -86,7 +86,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-slate-400 font-mono text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Gemma 2 • Ready</span>
+              <span>Google Gemma • Ready</span>
             </span>
           </div>
         </div>
@@ -212,9 +212,9 @@ export default function Home() {
               <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-3 font-mono text-xs">
                 03
               </div>
-              <h3 className="font-semibold text-sm text-white mb-1">Gemma 2 Schema Fix</h3>
+              <h3 className="font-semibold text-sm text-white mb-1">Gemma Schema Fix</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Google Gemma 2 synthesizes validated Schema.org Product JSON-LD ready to inject into Shopify Liquid in 1 click.
+                Google Gemma synthesizes validated Schema.org Product JSON-LD ready to inject into Shopify Liquid in 1 click.
               </p>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2 text-slate-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-                <span>[3/3] Gemma 2 9B synthesizing verified Product schema...</span>
+                <span>[3/3] Google Gemma synthesizing verified Product schema...</span>
               </div>
             </div>
           </div>
@@ -316,7 +316,9 @@ export default function Home() {
                 </div>
 
                 <div className="mt-6 pt-5 border-t border-white/[0.06]">
-                  <span className="text-[11px] font-mono text-slate-400 block mb-2.5 uppercase tracking-wider">Gemma 2 Fix Strategy</span>
+                  <span className="text-[11px] font-mono text-slate-400 block mb-2.5 uppercase tracking-wider">
+                    {result.audit.modelUsed ? `${result.audit.modelUsed} Strategy` : "Google Gemma Fix Strategy"}
+                  </span>
                   <ul className="space-y-2 text-xs text-slate-300">
                     {result.audit.recommendations.map((rec: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2">
@@ -421,7 +423,7 @@ export default function Home() {
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs">
                   <Code2 className="w-4 h-4" />
-                  <span>Schema.org/Product JSON-LD (Gemma 2 Generated)</span>
+                  <span>Schema.org/Product JSON-LD ({result.audit.modelUsed || "Google Gemma Generated"})</span>
                 </div>
                 <button
                   onClick={() => copyToClipboard(JSON.stringify(result.audit.generatedJsonLd, null, 2))}
@@ -448,7 +450,7 @@ export default function Home() {
           <span>Open-Source AI Commerce</span>
         </div>
         <div className="flex items-center gap-4 text-[11px] font-mono">
-          <span>Google Gemma 2</span>
+          <span>Google Gemma</span>
           <span>•</span>
           <span>SerpApi</span>
           <span>•</span>

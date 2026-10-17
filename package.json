@@ -1,7 +1,7 @@
 {
   "name": "catalog-pulse",
   "version": "1.0.0",
-  "description": "Open-Source AI Commerce & Catalog Linter powered by Google Gemma 2 & SerpApi",
+  "description": "Open-Source AI Commerce & Catalog Linter powered by Google Gemma & SerpApi",
   "private": true,
   "scripts": {
     "dev": "next dev",
