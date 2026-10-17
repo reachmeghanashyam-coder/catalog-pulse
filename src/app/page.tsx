@@ -271,6 +271,12 @@ export default function Home() {
                   <div className="inline-flex items-center gap-1.5 text-[11px] font-mono text-cyan-400 mb-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Catalog Audit Complete</span>
+                    {result.audit.modelUsed && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-emerald-400 font-mono">{result.audit.modelUsed}</span>
+                      </>
+                    )}
                   </div>
                   <h3 className="font-bold text-lg text-white leading-snug">{result.product.title}</h3>
                   <p className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed">{result.audit.summary}</p>

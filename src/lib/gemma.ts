@@ -5,6 +5,7 @@ export interface GemmaAuditResult {
   criticalFlaws: string[];
   recommendations: string[];
   generatedJsonLd: object;
+  modelUsed?: string;
 }
 
 export async function runGemmaAudit(
@@ -71,6 +72,7 @@ Perform deep forensic analysis and return the JSON response.`;
             if (jsonMatch) {
               const parsed = JSON.parse(jsonMatch[0]);
               if (parsed.score && parsed.generatedJsonLd) {
+                parsed.modelUsed = `Google Gemma 4 (${gemmaModel})`;
                 return parsed;
               }
             }
@@ -115,6 +117,7 @@ Perform deep forensic analysis and return the JSON response.`;
           if (content) {
             const parsed = JSON.parse(content);
             if (parsed.score && parsed.generatedJsonLd) {
+              parsed.modelUsed = `Groq Open-Weights (${modelId})`;
               return parsed;
             }
           }
@@ -175,6 +178,7 @@ Perform deep forensic analysis and return the JSON response.`;
       "If your product has an official barcode (UPC/EAN/GTIN), declare it to improve cross-catalog matching.",
       "Ensure currency code and availability reflect real-time inventory state.",
     ],
+    modelUsed: "Deterministic Schema Engine",
     generatedJsonLd: {
       "@context": "https://schema.org/",
       "@type": "Product",
