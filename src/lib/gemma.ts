@@ -42,41 +42,79 @@ Perform deep forensic analysis and return the JSON response.`;
 
   const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
-  // 1. Primary: Google Official Hosted Gemma (gemma-4-31b-it / gemma-4-26b-a4b-it)
+  const groundJsonLd = (rawSchema: any) => {
+    const base = typeof rawSchema === "object" && rawSchema !== null ? rawSchema : {};
+    const offers = typeof base.offers === "object" && !Array.isArray(base.offers) && base.offers !== null ? base.offers : {};
+    return {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": productData.title || base.name || "Product",
+      "description": productData.description && productData.description !== "No description detected."
+        ? productData.description
+        : (base.description || `${productData.title} by ${productData.brand}`),
+      ...(productData.images?.length ? { "image": productData.images } : base.image && !String(base.image).includes("example.com") ? { "image": base.image } : {}),
+      "brand": {
+        "@type": "Brand",
+        "name": productData.brand || base.brand?.name || "Brand",
+      },
+      "sku": productData.sku && productData.sku !== "SKU-UNKNOWN" ? productData.sku : (base.sku || "SKU-PRIMARY"),
+      ...(productData.gtin ? { "gtin13": productData.gtin } : {}),
+      "offers": {
+        "@type": "Offer",
+        ...(productData.url ? { "url": productData.url } : {}),
+        "priceCurrency": productData.currency || offers.priceCurrency || "USD",
+        "price": productData.price && productData.price !== "0.00" ? productData.price : (offers.price || "0.00"),
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": productData.availability === "InStock" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      },
+    };
+  };
+
+  // 1. Primary: Google Official Hosted Gemma (gemma-4-26b-a4b-it / gemma-4-31b-it) via Native REST API
   if (geminiApiKey) {
-    const gemmaModels = ["gemma-4-31b-it", "gemma-4-26b-a4b-it"];
+    const gemmaModels = ["gemma-4-26b-a4b-it", "gemma-4-31b-it"];
     for (const gemmaModel of gemmaModels) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const timeoutId = setTimeout(() => controller.abort(), 28000);
 
-        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
-          signal: controller.signal,
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${geminiApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: gemmaModel,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userPrompt },
-            ],
-            temperature: 0.2,
-          }),
-        });
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${gemmaModel}:generateContent?key=${geminiApiKey}`,
+          {
+            signal: controller.signal,
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.1,
+              },
+            }),
+          }
+        );
         clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
-          const content = data.choices[0]?.message?.content;
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          const answerParts = parts.filter((p: any) => !p.thought && typeof p.text === "string");
+          const content = (answerParts.length ? answerParts : parts)
+            .map((p: any) => p.text || "")
+            .join("\n");
+
           if (content) {
-            // Strip any thought or code fence wrapper
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
               const parsed = JSON.parse(jsonMatch[0]);
-              if (parsed.score && parsed.generatedJsonLd) {
+              if (typeof parsed.score === "number") {
+                parsed.generatedJsonLd = groundJsonLd(parsed.generatedJsonLd);
                 parsed.modelUsed = `Google Gemma 4 (${gemmaModel})`;
                 return parsed;
               }
@@ -121,7 +159,8 @@ Perform deep forensic analysis and return the JSON response.`;
           const content = data.choices[0]?.message?.content;
           if (content) {
             const parsed = JSON.parse(content);
-            if (parsed.score && parsed.generatedJsonLd) {
+            if (typeof parsed.score === "number") {
+              parsed.generatedJsonLd = groundJsonLd(parsed.generatedJsonLd);
               parsed.modelUsed = `Groq Open-Weights (${modelId})`;
               return parsed;
             }
