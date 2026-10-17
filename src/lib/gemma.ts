@@ -72,11 +72,20 @@ Perform deep forensic analysis and return the JSON response.`;
 
   // 1. Primary: Google Official Hosted Gemma (gemma-4-26b-a4b-it / gemma-4-31b-it) via Native REST API
   if (geminiApiKey) {
+    const marketSummary = serpContext?.marketItems?.length
+      ? serpContext.marketItems
+          .slice(0, 4)
+          .map((i: any) => `${String(i.price || "").replace(/\$/g, "")} USD (${i.source})`)
+          .join(", ")
+      : "No external listings";
+
+    const gemmaPrompt = `You are CatalogPulse, an expert AI-Commerce & Agentic Shopping Linter. Audit this product and return ONLY a JSON object with keys: score (0-100), grade (A-F), summary (1 sentence), criticalFlaws (array of 2-3 strings), recommendations (array of 2-3 strings). Product: ${productData.title} by ${productData.brand}, Price: ${productData.price} ${productData.currency}, SKU: ${productData.sku}, GTIN: ${productData.gtin || "MISSING"}, Microdata: ${productData.microdataPresent}, Issues: ${(productData.detectedIssues || []).join(" ") || "None"}. SerpApi Market: ${serpContext?.totalResultsFound || 0} listings found (${marketSummary}).`;
+
     const gemmaModels = ["gemma-4-26b-a4b-it", "gemma-4-31b-it"];
     for (const gemmaModel of gemmaModels) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 28000);
+        const timeoutId = setTimeout(() => controller.abort(), 35000);
 
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${gemmaModel}:generateContent?key=${geminiApiKey}`,
@@ -90,7 +99,7 @@ Perform deep forensic analysis and return the JSON response.`;
               contents: [
                 {
                   role: "user",
-                  parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+                  parts: [{ text: gemmaPrompt }],
                 },
               ],
               generationConfig: {
