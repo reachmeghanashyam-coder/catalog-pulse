@@ -63,7 +63,7 @@ Large enterprises pay thousands of dollars for enterprise SEO/observability tool
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/catalog-pulse.git
+git clone https://github.com/reachmeghanashyam-coder/catalog-pulse.git
 cd catalog-pulse
 ```
 
@@ -76,7 +76,8 @@ npm install
 Create a `.env.local` file:
 ```env
 SERPAPI_API_KEY="your_serpapi_key"
-GROQ_API_KEY="your_groq_or_hf_key"
+GROQ_API_KEY="your_groq_api_key"
+HF_TOKEN="your_hf_token_optional"
 ```
 
 ### 4. Run the development server
