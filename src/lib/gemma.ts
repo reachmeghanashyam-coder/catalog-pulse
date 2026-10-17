@@ -39,7 +39,50 @@ SerpApi Google Shopping Signals: ${JSON.stringify(serpContext || {})}
 
 Perform deep forensic analysis and return the JSON response.`;
 
-  // 1. Try Groq Open-Weights Inference (Fast, production-grade)
+  const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+  // 1. Primary: Google Official Hosted Gemma (gemma-4-31b-it / gemma-4-26b-a4b-it)
+  if (geminiApiKey) {
+    const gemmaModels = ["gemma-4-31b-it", "gemma-4-26b-a4b-it"];
+    for (const gemmaModel of gemmaModels) {
+      try {
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${geminiApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: gemmaModel,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            temperature: 0.2,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const content = data.choices[0]?.message?.content;
+          if (content) {
+            // Strip any thought or code fence wrapper
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[0]);
+              if (parsed.score && parsed.generatedJsonLd) {
+                return parsed;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Google AI Studio ${gemmaModel} inference error:`, e);
+      }
+    }
+  }
+
+  // 2. Secondary: Groq Open-Weights Inference (Fast fallback)
   if (groqApiKey) {
     const modelsToTry = [
       "qwen/qwen3.8-27b",
