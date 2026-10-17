@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --experimental-strip-types --test tests/parser.test.mjs tests/scoring.test.mjs tests/grounding.test.mjs tests/serpapi.test.mjs tests/gemma-inference.test.mjs tests/security.test.mjs",
+    "test:live": "node --test tests/live-integration.test.mjs"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
