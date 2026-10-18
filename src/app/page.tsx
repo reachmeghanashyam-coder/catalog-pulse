@@ -139,18 +139,18 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-cyan-500/10 via-indigo-500/5 to-transparent blur-[140px] pointer-events-none -z-10" />
       <div className="absolute top-[20%] left-1/4 w-[350px] h-[350px] bg-cyan-500/5 blur-[120px] pointer-events-none -z-10" />
 
-      {/* Floating Island Navigation Header */}
-      <header className="sticky top-4 z-50 max-w-4xl mx-auto px-4 w-full">
-        <div className="backdrop-blur-xl bg-slate-900/60 border border-white/[0.08] rounded-full px-5 py-2.5 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      {/* Clean Modern Navigation Header */}
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#07090e]/80 border-b border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center shadow-sm shadow-cyan-500/30">
-              <Activity className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center shadow-sm shadow-cyan-500/30">
+              <Activity className="w-4 h-4 text-black stroke-[2.5]" />
             </div>
             <span className="font-semibold text-sm tracking-tight text-white">CatalogPulse</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-slate-400 font-mono text-[11px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-slate-400 font-mono text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Google Gemma • Ready</span>
             </span>
