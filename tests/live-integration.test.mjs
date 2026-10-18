@@ -60,7 +60,7 @@ test("Live Production Audit: Allbirds Tree Runner test against live Vercel deplo
   console.log(`>>> INDEPENDENT PROVIDER VERIFICATION: PASS <<<`);
   console.log(`0. Provenance: ${data.extractionMode} @ ${data.auditedAt}`);
   console.log(`1. SerpApi: ${data.serpContext.totalResultsFound} Google Shopping results via ${data.serpContext.source}`);
-  console.log(`   Price Integrity: ${data.priceIntegrity.statusLabel} (Floor: $${data.priceIntegrity.minMarketPrice}, Median: $${data.priceIntegrity.medianMarketPrice}, Ceiling: $${data.priceIntegrity.maxMarketPrice})`);
+  console.log(`   Price Integrity: ${data.priceIntegrity.statusLabel} (Min Comp: $${data.priceIntegrity.minMarketPrice}, Median: $${data.priceIntegrity.medianMarketPrice}, Max Comp: $${data.priceIntegrity.maxMarketPrice})`);
   console.log(`   Sample Market Item: "${data.serpContext.marketItems[0].title}" - ${data.serpContext.marketItems[0].price} (${data.serpContext.marketItems[0].source})`);
   console.log(`2. Google Gemma: Verified active model -> ${data.audit.modelUsed}`);
   console.log(`   Audit Score: ${data.audit.score} (Grade ${data.audit.grade})`);
