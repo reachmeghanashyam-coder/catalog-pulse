@@ -203,11 +203,15 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
         </div>
       </header>
 
-      {/* Main Content Area with Generous Apple Spacing */}
-      <main className="max-w-4xl mx-auto px-4 pt-16 sm:pt-24 pb-20 w-full flex-1">
+      {/* Main Content Area with Generous Apple Spacing (Compresses smoothly during loading) */}
+      <main className={`max-w-4xl mx-auto px-4 pb-20 w-full flex-1 transition-all duration-300 ${
+        loading ? "pt-6 sm:pt-10" : "pt-14 sm:pt-20"
+      }`}>
         {/* Hero Section */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-slate-300 text-xs font-mono mb-6 backdrop-blur-md">
+        <div className={`text-center max-w-2xl mx-auto transition-all duration-300 ${
+          loading ? "mb-6" : "mb-12"
+        }`}>
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-slate-300 text-xs font-mono mb-4 backdrop-blur-md">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
@@ -215,16 +219,20 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
             <span>AI Search Visibility Scanner</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08] mb-5">
+          <h1 className={`font-extrabold tracking-tight text-white leading-[1.08] transition-all duration-300 ${
+            loading ? "text-3xl sm:text-4xl mb-2" : "text-4xl sm:text-6xl mb-4"
+          }`}>
             Your products. <br />
             <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-indigo-300 bg-clip-text text-transparent">
               Recommended by AI.
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-lg mx-auto font-normal">
-            ChatGPT, Perplexity, and Gemini skip catalogs with broken microdata. Audit your product in 10 seconds and generate 1-click JSON-LD fixes.
-          </p>
+          {!loading && (
+            <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-lg mx-auto font-normal animate-fade-in">
+              ChatGPT, Perplexity, and Gemini skip catalogs with broken microdata. Audit your product in 10 seconds and generate 1-click JSON-LD fixes.
+            </p>
+          )}
         </div>
 
         {/* Apple Spotlight / Raycast Style Command Bar */}
@@ -333,28 +341,28 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
 
         {/* Live Loading State: Dynamic Multi-Stage Radar with Live Progress */}
         {loading && (
-          <div className="mt-14 max-w-lg mx-auto p-7 rounded-3xl bg-slate-900/80 border border-white/[0.14] backdrop-blur-2xl text-center shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.12)] animate-fade-in relative overflow-hidden">
+          <div className="mt-6 max-w-lg mx-auto p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-white/[0.14] backdrop-blur-2xl text-center shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.12)] animate-fade-in relative overflow-hidden">
             {/* Ambient scanning laser light */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
 
             {/* Pulsing center radar orb with real-time timer */}
-            <div className="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <div className="relative w-14 h-14 mx-auto mb-3 flex items-center justify-center">
               <div className="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-xl animate-pulse" />
-              <div className="w-14 h-14 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex flex-col items-center justify-center shadow-lg shadow-cyan-500/10">
-                <span className="font-mono text-base font-bold text-cyan-300 leading-none">{elapsedSeconds}s</span>
-                <span className="text-[9px] font-mono text-slate-500 uppercase mt-0.5">elapsed</span>
+              <div className="w-12 h-12 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex flex-col items-center justify-center shadow-lg shadow-cyan-500/10">
+                <span className="font-mono text-sm font-bold text-cyan-300 leading-none">{elapsedSeconds}s</span>
+                <span className="text-[8px] font-mono text-slate-500 uppercase mt-0.5">elapsed</span>
               </div>
             </div>
 
-            <h4 className="font-bold text-base text-white mb-1 tracking-tight">
+            <h4 className="font-bold text-sm sm:text-base text-white mb-0.5 tracking-tight">
               Executing Forensic Catalog Audit
             </h4>
-            <p className="text-xs text-slate-400 font-mono mb-5">
+            <p className="text-[11px] sm:text-xs text-slate-400 font-mono mb-4">
               Simulating autonomous shopping agent crawlers...
             </p>
 
             {/* Dynamic Step-by-Step Telemetry Pipeline */}
-            <div className="space-y-2 text-left font-mono text-[11px] bg-black/50 p-4 rounded-2xl border border-white/[0.06]">
+            <div className="space-y-1.5 text-left font-mono text-[11px] bg-black/50 p-3 sm:p-3.5 rounded-2xl border border-white/[0.06]">
               {/* Step 1: DOM & Microdata Extraction */}
               <div className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
                 loadingStep > 1 ? "bg-emerald-500/10 text-emerald-300" :
