@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Search, 
   Sparkles, 
@@ -18,15 +18,60 @@ import {
   ChevronRight,
   Zap,
   Globe2,
-  Cpu
+  Cpu,
+  Loader2
 } from "lucide-react";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let stepTimer1: NodeJS.Timeout;
+    let stepTimer2: NodeJS.Timeout;
+    let stepTimer3: NodeJS.Timeout;
+
+    if (loading) {
+      setElapsedSeconds(0);
+      setLoadingStep(0);
+
+      // Increment elapsed timer every second
+      timer = setInterval(() => {
+        setElapsedSeconds((prev) => prev + 1);
+      }, 1000);
+
+      // Stage 1: Domestic parsing (0s)
+      setLoadingStep(1);
+
+      // Stage 2: SerpApi Google Shopping Market Telemetry (~2.5s)
+      stepTimer1 = setTimeout(() => {
+        setLoadingStep(2);
+      }, 2500);
+
+      // Stage 3: Google Gemma 4 Neural Synthesis (~6s)
+      stepTimer2 = setTimeout(() => {
+        setLoadingStep(3);
+      }, 6000);
+
+      // Stage 4: Fact Grounding & Formatting (~12s)
+      stepTimer3 = setTimeout(() => {
+        setLoadingStep(4);
+      }, 12000);
+    }
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
+      clearTimeout(stepTimer3);
+    };
+  }, [loading]);
 
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,35 +331,117 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
           </div>
         )}
 
-        {/* Live Loading State: Apple-Grade Visual Telemetry */}
+        {/* Live Loading State: Dynamic Multi-Stage Radar with Live Progress */}
         {loading && (
-          <div className="mt-14 max-w-lg mx-auto p-7 rounded-3xl bg-slate-900/70 border border-white/[0.12] backdrop-blur-2xl text-center shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.1)] animate-fade-in relative overflow-hidden">
+          <div className="mt-14 max-w-lg mx-auto p-7 rounded-3xl bg-slate-900/80 border border-white/[0.14] backdrop-blur-2xl text-center shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.12)] animate-fade-in relative overflow-hidden">
             {/* Ambient scanning laser light */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
-            
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-500/10">
-              <Activity className="w-6 h-6 text-cyan-400 animate-spin" />
+
+            {/* Pulsing center radar orb with real-time timer */}
+            <div className="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-xl animate-pulse" />
+              <div className="w-14 h-14 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex flex-col items-center justify-center shadow-lg shadow-cyan-500/10">
+                <span className="font-mono text-base font-bold text-cyan-300 leading-none">{elapsedSeconds}s</span>
+                <span className="text-[9px] font-mono text-slate-500 uppercase mt-0.5">elapsed</span>
+              </div>
             </div>
 
-            <h4 className="font-bold text-base text-white mb-1.5 tracking-tight">Simulating AI Shopping Mission</h4>
-            <p className="text-xs text-slate-400 font-mono mb-6">
-              Probing how frontier LLMs parse this catalog...
+            <h4 className="font-bold text-base text-white mb-1 tracking-tight">
+              Executing Forensic Catalog Audit
+            </h4>
+            <p className="text-xs text-slate-400 font-mono mb-5">
+              Simulating autonomous shopping agent crawlers...
             </p>
 
-            {/* Micro Multi-Stage Radar Stream */}
-            <div className="space-y-2.5 text-left font-mono text-[11px] bg-black/40 p-3.5 rounded-2xl border border-white/[0.05]">
-              <div className="flex items-center gap-2 text-cyan-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                <span>[1/3] Extracting Schema.org JSON-LD & DOM Microdata...</span>
+            {/* Dynamic Step-by-Step Telemetry Pipeline */}
+            <div className="space-y-2 text-left font-mono text-[11px] bg-black/50 p-4 rounded-2xl border border-white/[0.06]">
+              {/* Step 1: DOM & Microdata Extraction */}
+              <div className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                loadingStep > 1 ? "bg-emerald-500/10 text-emerald-300" :
+                loadingStep === 1 ? "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/30" : "text-slate-600"
+              }`}>
+                <div className="flex items-center gap-2.5">
+                  {loadingStep > 1 ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : loadingStep === 1 ? (
+                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />
+                  )}
+                  <span>1. DOM &amp; Schema.org JSON-LD Extraction</span>
+                </div>
+                <span className="text-[10px] font-sans">
+                  {loadingStep > 1 ? "Parsed" : loadingStep === 1 ? "Active..." : "Pending"}
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-indigo-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                <span>[2/3] Checking SerpApi Google Shopping for rogue pricing...</span>
+
+              {/* Step 2: SerpApi Live Google Shopping Cross-Check */}
+              <div className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                loadingStep > 2 ? "bg-emerald-500/10 text-emerald-300" :
+                loadingStep === 2 ? "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/30" : "text-slate-600"
+              }`}>
+                <div className="flex items-center gap-2.5">
+                  {loadingStep > 2 ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : loadingStep === 2 ? (
+                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />
+                  )}
+                  <span>2. SerpApi Google Shopping Market Telemetry</span>
+                </div>
+                <span className="text-[10px] font-sans">
+                  {loadingStep > 2 ? "Verified" : loadingStep === 2 ? "Querying..." : "Pending"}
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-                <span>[3/3] Google Gemma synthesizing verified Product schema...</span>
+
+              {/* Step 3: Google Gemma 4 AI Forensic Audit */}
+              <div className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                loadingStep > 3 ? "bg-emerald-500/10 text-emerald-300" :
+                loadingStep === 3 ? "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/30" : "text-slate-600"
+              }`}>
+                <div className="flex items-center gap-2.5">
+                  {loadingStep > 3 ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : loadingStep === 3 ? (
+                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />
+                  )}
+                  <span>3. Google Gemma 4 Neural Synthesis</span>
+                </div>
+                <span className="text-[10px] font-sans">
+                  {loadingStep > 3 ? "Complete" : loadingStep === 3 ? "Synthesizing..." : "Pending"}
+                </span>
               </div>
+
+              {/* Step 4: Strict Fact-Grounding & Liquid Generation */}
+              <div className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                loadingStep >= 4 ? "bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/30" : "text-slate-600"
+              }`}>
+                <div className="flex items-center gap-2.5">
+                  {loadingStep >= 4 ? (
+                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />
+                  )}
+                  <span>4. Fact-Grounding &amp; Liquid Fix Compiler</span>
+                </div>
+                <span className="text-[10px] font-sans">
+                  {loadingStep >= 4 ? "Finalizing..." : "Pending"}
+                </span>
+              </div>
+            </div>
+
+            {/* Reassuring Live Status Micro-Message */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-mono">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span>
+                {loadingStep <= 1 && "Connecting to remote storefront..."}
+                {loadingStep === 2 && "Scanning Google Shopping for reseller pricing..."}
+                {loadingStep === 3 && "Google Gemma 4 evaluating Schema microdata fidelity..."}
+                {loadingStep >= 4 && "Compiling standards-compliant JSON-LD deliverable..."}
+              </span>
             </div>
           </div>
         )}
