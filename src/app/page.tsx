@@ -238,7 +238,7 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
 
             <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-slate-400 font-sans">
               <Zap className="w-3 h-3 text-cyan-400" />
-              Instant 10s scan
+              Real-Time Catalog Scan
             </span>
           </div>
         </div>
@@ -428,7 +428,7 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
                   {result.priceIntegrity?.minMarketPrice && (
                     <div className="grid grid-cols-3 gap-2 mb-3 p-2.5 rounded-xl bg-black/40 border border-white/[0.05] font-mono text-[11px]">
                       <div>
-                        <span className="text-slate-500 text-[9px] uppercase block">Market Floor</span>
+                        <span className="text-slate-500 text-[9px] uppercase block">Lowest Comp</span>
                         <span className="text-cyan-400 font-semibold">${result.priceIntegrity.minMarketPrice}</span>
                       </div>
                       <div>
@@ -436,7 +436,7 @@ ${JSON.stringify(audit.generatedJsonLd, null, 2)}
                         <span className="text-white font-semibold">${result.priceIntegrity.medianMarketPrice}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 text-[9px] uppercase block">Market Ceiling</span>
+                        <span className="text-slate-500 text-[9px] uppercase block">Highest Comp</span>
                         <span className="text-slate-300 font-semibold">${result.priceIntegrity.maxMarketPrice}</span>
                       </div>
                     </div>
